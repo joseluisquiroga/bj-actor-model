@@ -1,0 +1,148 @@
+
+
+/*************************************************************
+
+This file is part of messaging-cells.
+
+messaging-cells is free software: you can redistribute it and/or modify
+it under the terms of the version 3 of the GNU General Public 
+License as published by the Free Software Foundation.
+
+messaging-cells is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with messaging-cells.  If not, see <http://www.gnu.org/licenses/>.
+
+------------------------------------------------------------
+
+Copyright (C) 2017-2018. QUIROGA BELTRAN, Jose Luis.
+Id (cedula): 79523732 de Bogota - Colombia.
+See https://messaging-cells.github.io/
+
+messaging-cells is free software thanks to The Glory of Our Lord 
+	Yashua Melej Hamashiaj.
+Our Resurrected and Living, both in Body and Spirit, 
+	Prince of Peace.
+
+------------------------------------------------------------
+
+  philo.ldf
+
+------------------------------------------------------------*/
+
+OUTPUT_FORMAT("elf32-epiphany", "elf32-epiphany", "elf32-epiphany")
+OUTPUT_ARCH(epiphany)
+ENTRY(_start)
+
+PROVIDE (___bss_start = __bss_start);
+
+/* =============================================================================================== 
+USER DEFINED SIZES
+*/
+
+LD_EXTERNAL_RAM_SIZE = 32M;	/* all external ram */
+LD_EXTERNAL_CODE_SIZE = 8M;	/* ready to exec shared code (.text, data, rodata, bss and .stack) */
+LD_EXTERNAL_LOAD_SIZE = 8M;	/* ready to load shared code (elf format)*/
+LD_EXTERNAL_MANAGERU_DATA_SIZE = 8M;	/* shared data (a big struct) */
+LD_EXTERNAL_MANAGERU_ALLOC_SIZE = 8M;	/* alloc (dynamic heap) shared data */ 
+
+LD_WORKERU_IVT_SIZE = 0x100;
+LD_WORKERU_CODE_SIZE = 16k - LD_WORKERU_IVT_SIZE;
+LD_WORKERU_STACK_SIZE = 18k - LD_WORKERU_CODE_SIZE - LD_WORKERU_IVT_SIZE;
+LD_WORKERU_MODULE_SIZE = 2k;
+LD_WORKERU_ALLOC_SIZE = 12k;
+
+/* =============================================================================================== */
+
+LD_EXTERNAL_RAM_ORIG = 0x8e000000;
+LD_EXTERNAL_CODE_ORIG = LD_EXTERNAL_RAM_ORIG;
+LD_EXTERNAL_LOAD_ORIG = LD_EXTERNAL_CODE_ORIG + LD_EXTERNAL_CODE_SIZE;
+LD_EXTERNAL_MANAGERU_DATA_ORIG = LD_EXTERNAL_LOAD_ORIG + LD_EXTERNAL_LOAD_SIZE;
+LD_EXTERNAL_MANAGERU_ALLOC_ORIG = LD_EXTERNAL_MANAGERU_DATA_ORIG + LD_EXTERNAL_MANAGERU_DATA_SIZE;
+
+LD_WORKERU_IVT_ORIG = 0;
+LD_WORKERU_CODE_ORIG = LD_WORKERU_IVT_ORIG + LD_WORKERU_IVT_SIZE;
+LD_WORKERU_STACK_ORIG = LD_WORKERU_CODE_ORIG + LD_WORKERU_CODE_SIZE;
+LD_WORKERU_MODULE_ORIG = LD_WORKERU_STACK_ORIG + LD_WORKERU_STACK_SIZE;
+LD_WORKERU_ALLOC_ORIG = LD_WORKERU_MODULE_ORIG + LD_WORKERU_MODULE_SIZE;
+
+LD_WORKERU_STACK_END = LD_WORKERU_MODULE_ORIG;
+LD_WORKERU_ALLOC_END = LD_WORKERU_ALLOC_ORIG + LD_WORKERU_ALLOC_SIZE;
+LD_WORKERU_STACK_TOP = LD_WORKERU_STACK_END - 8;
+
+MEMORY
+{
+	IVT_RAM (WXAI) : ORIGIN = LD_WORKERU_IVT_ORIG, LENGTH = LD_WORKERU_IVT_SIZE
+
+	CODE_RAM (WXAI) : ORIGIN = LD_WORKERU_CODE_ORIG, LENGTH = LD_WORKERU_CODE_SIZE
+
+	MODULE_1 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+	MODULE_2 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+	MODULE_3 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+	MODULE_4 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+	MODULE_5 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+	MODULE_6 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+	MODULE_7 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+	MODULE_8 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+	MODULE_9 (WXAI) : ORIGIN = LD_WORKERU_MODULE_ORIG, LENGTH = LD_WORKERU_MODULE_SIZE
+
+	ALLOC_RAM (WXAI) : ORIGIN = LD_WORKERU_ALLOC_ORIG, LENGTH = LD_WORKERU_ALLOC_SIZE
+
+	LD_EXTERNAL_CODE_RAM (WXAI)   : ORIGIN = LD_EXTERNAL_CODE_ORIG, LENGTH = LD_EXTERNAL_CODE_SIZE
+	LD_EXTERNAL_LOAD_RAM (WXAI)   : ORIGIN = LD_EXTERNAL_LOAD_ORIG, LENGTH = LD_EXTERNAL_LOAD_SIZE
+	LD_EXTERNAL_MANAGERU_DATA_RAM (WXAI)   : ORIGIN = LD_EXTERNAL_MANAGERU_DATA_ORIG, LENGTH = LD_EXTERNAL_MANAGERU_DATA_SIZE
+	LD_EXTERNAL_MANAGERU_ALLOC_RAM (WXAI)   : ORIGIN = LD_EXTERNAL_MANAGERU_ALLOC_ORIG, LENGTH = LD_EXTERNAL_MANAGERU_ALLOC_SIZE
+}
+
+
+SECTIONS
+{
+	link_symbols_data : { *(link_symbols_data*) } > LD_EXTERNAL_CODE_RAM
+
+	ivt_reset               0x00 : {*.o(IVT_RESET)}                    > IVT_RAM
+	ivt_software_exception  0x04 : {*.o(ivt_entry_software_exception)} > IVT_RAM
+	ivt_page_miss           0x08 : {*.o(ivt_entry_page_miss)}          > IVT_RAM
+	ivt_timer0              0x0c : {*.o(ivt_entry_timer0)}             > IVT_RAM
+	ivt_timer1              0x10 : {*.o(ivt_entry_timer1)}             > IVT_RAM
+	ivt_message             0x14 : {*.o(ivt_entry_message)}            > IVT_RAM
+	ivt_dma0                0x18 : {*.o(ivt_entry_dma0)}               > IVT_RAM
+	ivt_dma1                0x1c : {*.o(ivt_entry_dma1)}               > IVT_RAM
+	ivt_wand                0x20 : {*.o(ivt_entry_wand)}               > IVT_RAM
+	ivt_user                0x24 : {*.o(ivt_entry_user)}               > IVT_RAM
+
+	external_code_ram : { *(external_code_ram external_data_ram) } > LD_EXTERNAL_CODE_RAM
+	external_load_ram : { *(external_load_ram) } > LD_EXTERNAL_LOAD_RAM
+	external_manageru_data_ram : { *(external_manageru_data_ram) } > LD_EXTERNAL_MANAGERU_DATA_RAM 
+	external_manageru_alloc_ram : { *(external_manageru_alloc_ram) } > LD_EXTERNAL_MANAGERU_ALLOC_RAM 
+
+	NEW_LIB_RO            : {lib_a-*.o(.text  .rodata)  *.o(libgloss_epiphany) } > LD_EXTERNAL_CODE_RAM
+	NEW_LIB_WR            : {lib_a-*.o(.data)                                  } > LD_EXTERNAL_CODE_RAM
+	GNU_C_BUILTIN_LIB_RO  :
+	{
+		*mulsi3.o(.text  .rodata)   *modsi3.o(.text  .rodata)
+		*divsi3.o(.text  .rodata)   *udivsi3.o(.text .rodata)
+		*umodsi3.o(.text .rodata)  _*.o(.text  .rodata)
+	} > LD_EXTERNAL_CODE_RAM
+
+	.text : { *(.text*) } > CODE_RAM
+	.data : { *(.data*) } > CODE_RAM
+	.rodata : { *(.rodata*) } > LD_EXTERNAL_CODE_RAM
+	.bss : { *(.bss*) } > CODE_RAM 
+
+	module1 : { *(module1*) } > MODULE_1
+	module2 : { *(module2*) } > MODULE_2
+	module3 : { *(module3*) } > MODULE_3
+	module4 : { *(module4*) } > MODULE_4
+	module5 : { *(module5*) } > MODULE_5
+	module6 : { *(module6*) } > MODULE_6
+	module7 : { *(module7*) } > MODULE_7
+	module8 : { *(module8*) } > MODULE_8
+	module9 : { *(module9*) } > MODULE_9
+
+	alloc_ram   : {*.o(alloc_ram)} > ALLOC_RAM
+
+	.comment  0 : { *(.comment*) }
+}

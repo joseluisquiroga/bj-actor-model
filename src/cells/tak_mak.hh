@@ -2,7 +2,7 @@
 
 /*************************************************************
 
-ben-jose
+messaging-cells
 
 tak_mak.h
 
@@ -11,7 +11,7 @@ tak_mak.h
 Adapted 2011 to c++ by 
 QUIROGA BELTRAN, Jose Luis.
 Id (cedula): 79523732 de Bogota - Colombia.
-See https://github.com/joseluisquiroga/ben-jose
+See https://messaging-cells.github.io/
 
 ------------------------------------------------------------
 

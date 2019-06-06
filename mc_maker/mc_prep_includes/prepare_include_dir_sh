@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# generate ALL_INCLUDE.txt with:
+# cat mc_maker/mc_prep_includes/USER_INCLUDE_FILES.txt | xargs -L 1 find . -name > mc_maker/mc_prep_includes/ALL_INCLUDE.txt
+
+echo "Preparing install include dir" 
+
+CURR_DIR=$(pwd)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BASE_DIR=$SCRIPT_DIR/../..
+
+
+cd $SCRIPT_DIR
+
+INCLU_DIR=../mc_install/mc_include
+mkdir -p $INCLU_DIR
+
+IFS=$'\n'       # make newlines the only separator
+set -f          # disable globbing
+for ii in $(cat < ALL_INCLUDE.txt); do
+	cp -vau $BASE_DIR/$ii $INCLU_DIR
+done
+
+cd $CURR_DIR
+

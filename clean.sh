@@ -1,11 +1,14 @@
 #!/bin/bash
 
-rm -rf ./bin
-rm -rf ./maker/build
+echo "FULL_CLEAN" 
 
-rm ./send_msg_code.s
-rm ./send_msg_sizes.txt
+CURR_DIR=$(pwd)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cd ./src/tests
-clean.sh
-cd ../..
+cd $SCRIPT_DIR
+mc_maker/clean.sh
+src/tests/src/clean.sh
+ben-jose-embryo/bj_maker/clean.sh
+hlang/hl_maker/hclean.sh
+cd $CURR_DIR
+

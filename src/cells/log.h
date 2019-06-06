@@ -1,5 +1,38 @@
 
-// log.h
+
+/*************************************************************
+
+This file is part of messaging-cells.
+
+messaging-cells is free software: you can redistribute it and/or modify
+it under the terms of the version 3 of the GNU General Public 
+License as published by the Free Software Foundation.
+
+messaging-cells is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with messaging-cells.  If not, see <http://www.gnu.org/licenses/>.
+
+------------------------------------------------------------
+
+Copyright (C) 2017-2018. QUIROGA BELTRAN, Jose Luis.
+Id (cedula): 79523732 de Bogota - Colombia.
+See https://messaging-cells.github.io/
+
+messaging-cells is free software thanks to The Glory of Our Lord 
+	Yashua Melej Hamashiaj.
+Our Resurrected and Living, both in Body and Spirit, 
+	Prince of Peace.
+
+------------------------------------------------------------*/
+/*! \file log.h
+
+\brief Defines log functions and macros.
+
+------------------------------------------------------------*/
 
 #ifndef MC_LOGS_H
 #define MC_LOGS_H
@@ -15,7 +48,9 @@ mc_c_decl {
 enum mc_out_omc_type_def {
 	MC_OUT_LOG,
 	MC_OUT_PRT,
-	MC_OUT_MSG
+	MC_OUT_LOCK_LOG,
+	MC_OUT_UNLOCK_LOG,
+	MC_OUT_ABORT
 };
 typedef enum mc_out_omc_type_def mc_out_type_t;
 
@@ -37,53 +72,90 @@ typedef enum mc_type_def mc_type_t;
 // log messages
 
 void
-bjk_aux_sout(char* msg, mc_out_type_t outt) mc_external_code_ram;
+mck_aux_sout(bool cond, char* msg, mc_out_type_t outt) mc_external_code_ram;
 
+//! Locks this workeru log file
 mc_inline_fn void
-bjk_slog(char* msg){
-	bjk_aux_sout(msg, MC_OUT_LOG);
+mck_lock_log(){
+	mck_aux_sout(mc_true, mc_cstr("lck"), MC_OUT_LOCK_LOG);
 }
 
-#define	bjk_slog2(msg) bjk_slog(as_pt_char(msg))
-
+//! Unocks this workeru log file
 mc_inline_fn void
-bjk_sprt(char* msg){
-	bjk_aux_sout(msg, MC_OUT_PRT);
+mck_unlock_log(){
+	mck_aux_sout(mc_true, mc_cstr("ulk"), MC_OUT_UNLOCK_LOG);
 }
 
-#define	bjk_sprt2(msg) bjk_sprt(as_pt_char(msg))
+//! Logs a string in this workeru log file
+mc_inline_fn void
+mck_slog(char* msg){
+	mck_aux_sout(mc_true, msg, MC_OUT_LOG);
+}
+
+//! Sames as \ref mck_slog but it does a const_cast<char *> for you so you can use directly it in c++.
+#define	mck_slog2(msg) mck_slog(mc_cstr(msg))
+
+//! Conditionally logs a string in this workeru log file
+mc_inline_fn void
+mck_cond_slog(bool cond, char* msg){
+	mck_aux_sout(cond, msg, MC_OUT_LOG);
+}
+
+//! Sames as \ref mck_cond_slog but it does a const_cast<char *> for you so you can use directly it in c++.
+#define	mck_cond_slog2(cond, msg) mck_cond_slog(cond, mc_cstr(msg))
+
+//! Prints a string to stdout in the manageru.
+mc_inline_fn void
+mck_sprt(char* msg){
+	mck_aux_sout(mc_true, msg, MC_OUT_PRT);
+}
+
+//! Sames as \ref mck_sprt but it does a const_cast<char *> for you so you can use directly it in c++.
+#define	mck_sprt2(msg) mck_sprt(mc_cstr(msg))
 
 void
-bjk_aux_iout(uint32_t vv, mc_out_type_t outt, mc_type_t tt) mc_external_code_ram;
+mck_aux_iout(uint32_t vv, mc_out_type_t outt, mc_type_t tt) mc_external_code_ram;
 
+//! Aborts PTD
 mc_inline_fn void
-bjk_ilog(int32_t vv){
-	bjk_aux_iout(vv, MC_OUT_LOG, MC_I32);
+mc_out_abort_ptd(){
+	mck_aux_iout(0, MC_OUT_ABORT, MC_X32);
 }
 
+//! Logs an int32_t in this workeru log file
 mc_inline_fn void
-bjk_ulog(uint32_t vv){
-	bjk_aux_iout(vv, MC_OUT_LOG, MC_UI32);
+mck_ilog(int32_t vv){
+	mck_aux_iout(vv, MC_OUT_LOG, MC_I32);
 }
 
+//! Logs an uint32_t in this workeru log file
 mc_inline_fn void
-bjk_xlog(uint32_t vv){
-	bjk_aux_iout(vv, MC_OUT_LOG, MC_X32);
+mck_ulog(uint32_t vv){
+	mck_aux_iout(vv, MC_OUT_LOG, MC_UI32);
 }
 
+//! Logs an uint32_t as a hexadecimal in this workeru log file
 mc_inline_fn void
-bjk_iprt(int32_t vv){
-	bjk_aux_iout(vv, MC_OUT_PRT, MC_I32);
+mck_xlog(uint32_t vv){
+	mck_aux_iout(vv, MC_OUT_LOG, MC_X32);
 }
 
+//! Prints an int32_t to stdout in the manageru.
 mc_inline_fn void
-bjk_uprt(uint32_t vv){
-	bjk_aux_iout(vv, MC_OUT_PRT, MC_UI32);
+mck_iprt(int32_t vv){
+	mck_aux_iout(vv, MC_OUT_PRT, MC_I32);
 }
 
+//! Prints an uint32_t to stdout in the manageru.
 mc_inline_fn void
-bjk_xprt(uint32_t vv){
-	bjk_aux_iout(vv, MC_OUT_PRT, MC_X32);
+mck_uprt(uint32_t vv){
+	mck_aux_iout(vv, MC_OUT_PRT, MC_UI32);
+}
+
+//! Prints an uint32_t as a hexadecimal to stdout in the manageru.
+mc_inline_fn void
+mck_xprt(uint32_t vv){
+	mck_aux_iout(vv, MC_OUT_PRT, MC_X32);
 }
 
 #ifdef __cplusplus

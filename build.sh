@@ -2,18 +2,21 @@
 
 # set -e
 
-cd maker
+CURR_DIR=`pwd`
+
+cd mc_maker
 make
-cd ..
+cd $CURR_DIR
 
-cd src/tests
+cd src/tests/src
 make
-rm ./bin/log_core_*
-cd ../..
+cd $CURR_DIR
 
-PROG=src/tests/bin/send_msg_eph.elf
-e-objdump -D $PROG > send_msg_code.s
-e-objdump -h $PROG > send_msg_sizes.txt
+cd ben-jose-embryo/bj_maker
+make
+cd $CURR_DIR
 
-
+cd hlang/hl_maker
+make
+cd $CURR_DIR
 

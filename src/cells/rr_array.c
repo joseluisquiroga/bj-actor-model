@@ -1,4 +1,35 @@
 
+
+/*************************************************************
+
+This file is part of messaging-cells.
+
+messaging-cells is free software: you can redistribute it and/or modify
+it under the terms of the version 3 of the GNU General Public 
+License as published by the Free Software Foundation.
+
+messaging-cells is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with messaging-cells.  If not, see <http://www.gnu.org/licenses/>.
+
+------------------------------------------------------------
+
+Copyright (C) 2017-2018. QUIROGA BELTRAN, Jose Luis.
+Id (cedula): 79523732 de Bogota - Colombia.
+See https://messaging-cells.github.io/
+
+messaging-cells is free software thanks to The Glory of Our Lord 
+	Yashua Melej Hamashiaj.
+Our Resurrected and Living, both in Body and Spirit, 
+	Prince of Peace.
+
+------------------------------------------------------------*/
+
+
 #include "shared.h"
 #include "global.h"
 #include "rr_array.h"
@@ -77,19 +108,19 @@ mc_rr_init(mc_rrarray_st* arr, uint16_t sz, uint8_t* dat, uint8_t reset){
 	if(arr == mc_null){
 		return;
 	}
-	mc_set_off_chip_var(arr->magic_id, MC_MAGIC_ID);
-	mc_set_off_chip_var(arr->data, dat);
+	mc_loop_set_var(arr->magic_id, MC_MAGIC_ID);
+	mc_loop_set_var(arr->data, dat);
 	if(reset){
 		mc_memset(arr->data, 0, sz);
 	}
 	
-	mc_set_off_chip_var(arr->end_data, (dat + sz));
-	mc_set_off_chip_var(arr->wr_obj, arr->data);
-	mc_set_off_chip_var(arr->rd_obj, arr->data);
+	mc_loop_set_var(arr->end_data, (dat + sz));
+	mc_loop_set_var(arr->wr_obj, arr->data);
+	mc_loop_set_var(arr->rd_obj, arr->data);
 	
-	mc_set_off_chip_var(arr->num_wr_errs, 0);
-	mc_set_off_chip_var(arr->wr_err, 0);
-	mc_set_off_chip_var(arr->rd_err, 0);
+	mc_loop_set_var(arr->num_wr_errs, 0);
+	mc_loop_set_var(arr->wr_err, 0);
+	mc_loop_set_var(arr->rd_err, 0);
 }
 
 uint16_t
@@ -139,15 +170,15 @@ mc_rr_read_obj(mc_rrarray_st* arr, uint16_t omc_sz, uint8_t* obj){
 	uint8_t* dat = arr->rd_obj;
 	uint16_t osz = mc_rr_get_v16(arr, &dat);
 	if(osz == 0){
-		mc_set_off_chip_var(arr->rd_err, -1);
+		mc_loop_set_var(arr->rd_err, -1);
 		return 0;
 	}
 	if(osz > omc_sz){
-		mc_set_off_chip_var(arr->rd_err, -2);
+		mc_loop_set_var(arr->rd_err, -2);
 		return 0;
 	}
 	if(osz > (arr->end_data - arr->data)){
-		mc_set_off_chip_var(arr->rd_err, -3);
+		mc_loop_set_var(arr->rd_err, -3);
 		return 0;
 	}
 	uint16_t ii;
@@ -161,7 +192,7 @@ mc_rr_read_obj(mc_rrarray_st* arr, uint16_t omc_sz, uint8_t* obj){
 	uint16_t tcrc16 = mc_rr_get_v16(arr, &dat);
 	uint16_t rcrc16 = mc_crc16(obj, osz);
 	if(tcrc16 != rcrc16){
-		mc_set_off_chip_var(arr->rd_err, -4);
+		mc_loop_set_var(arr->rd_err, -4);
 		return 0;
 	}
 	uint8_t* dat2 = arr->rd_obj;
@@ -172,7 +203,7 @@ mc_rr_read_obj(mc_rrarray_st* arr, uint16_t omc_sz, uint8_t* obj){
 		(*dat2) = 0;
 		dat2++;
 	}
-	mc_set_off_chip_var(arr->rd_obj, dat2);
+	mc_loop_set_var(arr->rd_obj, dat2);
 	return osz;
 }
 
@@ -185,15 +216,15 @@ mc_rr_write_obj(mc_rrarray_st* arr, uint16_t omc_sz, uint8_t* obj){
 	uint32_t nme = arr->num_wr_errs;
 	uint16_t osz = omc_sz;
 	if(osz > ((arr->end_data - arr->data) - (2 * sizeof(uint16_t)))){
-		mc_set_off_chip_var(arr->wr_err, -1);
+		mc_loop_set_var(arr->wr_err, -1);
 		nme++;
-		mc_set_off_chip_var(arr->num_wr_errs, nme);
+		mc_loop_set_var(arr->num_wr_errs, nme);
 		return 0;
 	}
 	if(osz <= 0){
-		mc_set_off_chip_var(arr->wr_err, -2);
+		mc_loop_set_var(arr->wr_err, -2);
 		nme++;
-		mc_set_off_chip_var(arr->num_wr_errs, nme);
+		mc_loop_set_var(arr->num_wr_errs, nme);
 		return 0;
 	}
 	uint16_t w_sz = omc_sz + (3 * sizeof(uint16_t));
@@ -209,9 +240,9 @@ mc_rr_write_obj(mc_rrarray_st* arr, uint16_t omc_sz, uint8_t* obj){
 		dat2++;
 	}
 	if(dat2 == 0){
-		mc_set_off_chip_var(arr->wr_err, -3);
+		mc_loop_set_var(arr->wr_err, -3);
 		nme++;
-		mc_set_off_chip_var(arr->num_wr_errs, nme);
+		mc_loop_set_var(arr->num_wr_errs, nme);
 		return 0;
 	}
 	uint8_t* dat = arr->wr_obj;
@@ -226,7 +257,7 @@ mc_rr_write_obj(mc_rrarray_st* arr, uint16_t omc_sz, uint8_t* obj){
 	}
 	uint16_t rcrc16 = mc_crc16(obj, osz);
 	mc_rr_set_v16(arr, &dat, rcrc16);
-	mc_set_off_chip_var(arr->wr_obj, dat); 
+	mc_loop_set_var(arr->wr_obj, dat); 
 	return osz;
 }
 

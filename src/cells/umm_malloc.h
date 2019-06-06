@@ -26,7 +26,7 @@ typedef uint16_t umm_idx_t;
 #define UMM_MAX_NUM_BLOCKS 0xFFFF
 #define UMM_BEST_SIZE 0x7FFF
 
-#define umm_align(aa) mc_align(aa) 
+//define umm_align(aa) mc_align(aa) 
 
 #define umm_inline_fn mc_inline_fn
 
@@ -60,12 +60,12 @@ umm_memmove(uint8_t* dest, const uint8_t* src, umm_size_t sz){
 
 #define UMM_MAX_HEAP_SIZE (UMM_MAX_NUM_BLOCKS * sizeof(umm_block))
 
-#ifdef MC_IS_EMU_CODE
+#ifdef MC_IS_PTD_CODE
 	#define UMM_MALLOC_CFG__HEAP_SIZE 131064
 #else
-	extern mc_addr_t LD_CORE_ALLOC_ORIG;
-	extern mc_addr_t LD_CORE_ALLOC_SIZE;
-	#define UMM_MALLOC_CFG__HEAP_SIZE BJK_LINK_SCRIPT_SYM_VAL(LD_CORE_ALLOC_SIZE)
+	extern mc_addr_t LD_WORKERU_ALLOC_ORIG;
+	extern mc_addr_t LD_WORKERU_ALLOC_SIZE;
+	#define UMM_MALLOC_CFG__HEAP_SIZE MCK_LINK_SCRIPT_SYM_VAL(LD_WORKERU_ALLOC_SIZE)
 	//define UMM_MALLOC_CFG__HEAP_SIZE 8192
 #endif
 
@@ -179,7 +179,7 @@ UMM_H_ATTPACKPRE typedef struct umm_ptr_t {
 } UMM_H_ATTPACKSUF umm_ptr;
 
 
-UMM_H_ATTPACKPRE typedef struct umm_block_t {
+UMM_H_ATTPACKPRE typedef struct umm_blk {
 	union {
 		umm_ptr used;
 	} header;
@@ -191,9 +191,9 @@ UMM_H_ATTPACKPRE typedef struct umm_block_t {
 
 #define UMM_HEAP_NUM_BLOCKS (UMM_MALLOC_CFG__HEAP_SIZE / sizeof(umm_block))
 
-extern umm_idx_t umm_numblocks;
+//extern umm_idx_t umm_numblocks;
 
-#ifdef MC_IS_EMU_CODE
+#ifdef MC_IS_PTD_CODE
 	umm_block*
 	umm_get_heap();	// must have UMM_HEAP_NUM_BLOCKS in size
 

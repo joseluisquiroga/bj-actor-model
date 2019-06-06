@@ -1,12 +1,40 @@
 
 
-/*------------------------------------------------------------
+/*************************************************************
 
-binder.h
+This file is part of messaging-cells.
 
-binder class and related.
+messaging-cells is free software: you can redistribute it and/or modify
+it under the terms of the version 3 of the GNU General Public 
+License as published by the Free Software Foundation.
 
---------------------------------------------------------------*/
+messaging-cells is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with messaging-cells.  If not, see <http://www.gnu.org/licenses/>.
+
+------------------------------------------------------------
+
+Copyright (C) 2017-2018. QUIROGA BELTRAN, Jose Luis.
+Id (cedula): 79523732 de Bogota - Colombia.
+See https://messaging-cells.github.io/
+
+messaging-cells is free software thanks to The Glory of Our Lord 
+	Yashua Melej Hamashiaj.
+Our Resurrected and Living, both in Body and Spirit, 
+	Prince of Peace.
+
+------------------------------------------------------------*/
+/*! \file binder.h
+
+\brief The base class for objects that can form duble linked lists and structures.
+
+\callgraph
+\callergraph
+------------------------------------------------------------*/
 
 #ifndef BINDER_H
 #define BINDER_H
@@ -14,21 +42,21 @@ binder class and related.
 #include "shared.h"
 
 //define BINDER_CK(prm) 	DBG_CK(prm)
-#define BINDER_CK(prm) EMU_CK(prm)
+#define BINDER_CK(prm) PTD_CK(prm)
 
 //=================================================================
 // binder
 
 class binder;
 
-typedef binder* bjk_sptr_t;
-//define bjk_pt_to_binderpt(pt) (pt)
-//define bjk_binderpt_to_pt(bptr) (bptr)
+typedef binder* mck_sptr_t;
+//define mck_pt_to_binderpt(pt) (pt)
+//define mck_binderpt_to_pt(bptr) (bptr)
 
 class mc_aligned binder {
 public:
-	bjk_sptr_t	bn_left;
-	bjk_sptr_t	bn_right;
+	mck_sptr_t	bn_left;
+	mck_sptr_t	bn_right;
 
 	binder(){
 		init_binder();
@@ -39,27 +67,31 @@ public:
 
 	mc_opt_sz_fn
 	void		init_binder(){
-		bn_left = this;
-		bn_right = this;
+		binder* loc_ths = (binder*)mck_as_loc_pt(this);
+		bn_left = loc_ths;
+		bn_right = loc_ths;
 	}
 
 	mc_opt_sz_fn
 	bool	is_alone(){
-		return ((bn_left == this) && (bn_right == this));
+		binder* loc_ths = (binder*)mck_as_loc_pt(this);
+		return ((bn_left == loc_ths) && (bn_right == loc_ths));
 	}
 
 	mc_opt_sz_fn //virtual // mem expensive
 	void	let_go(){
+		binder* loc_ths = (binder*)mck_as_loc_pt(this);
 		bn_left->bn_right = bn_right;
 		bn_right->bn_left = bn_left;
-		bn_left = this;
-		bn_right = this;
+		bn_left = loc_ths;
+		bn_right = loc_ths;
 	}
 
 	mc_opt_sz_fn
 	bool	ck_binder(){
-		BINDER_CK(bn_right->bn_left == this);
-		BINDER_CK(bn_left->bn_right == this);
+		PTD_CODE(binder* loc_ths = (binder*)mck_as_loc_pt(this));
+		BINDER_CK(bn_right->bn_left == loc_ths);
+		BINDER_CK(bn_left->bn_right == loc_ths);
 		return true;
 	}
 
@@ -85,11 +117,12 @@ public:
 
 	mc_opt_sz_fn
 	void	bind_to_my_right(binder& the_rgt){
+		binder* loc_ths = (binder*)mck_as_loc_pt(this);
 		BINDER_CK(the_rgt.is_alone());
 		BINDER_CK(ck_binder());
 
 		the_rgt.bn_right = bn_right;
-		the_rgt.bn_left = this;
+		the_rgt.bn_left = loc_ths;
 		bn_right->bn_left = &the_rgt;
 		bn_right = &the_rgt;
 
@@ -99,11 +132,12 @@ public:
 
 	mc_opt_sz_fn
 	void	bind_to_my_left(binder& the_lft){
+		binder* loc_ths = (binder*)mck_as_loc_pt(this);
 		BINDER_CK(the_lft.is_alone());
 		BINDER_CK(ck_binder());
 
 		the_lft.bn_left = bn_left;
-		the_lft.bn_right = this;
+		the_lft.bn_right = loc_ths;
 		bn_left->bn_right = &the_lft;
 		bn_left = &the_lft;
 
@@ -126,6 +160,7 @@ public:
 		if(grp.is_alone()){
 			return;
 		}
+		binder* loc_ths = (binder*)mck_as_loc_pt(this);
 
 		BINDER_CK(ck_binder());
 
@@ -137,7 +172,7 @@ public:
 		grp.bn_left = &grp;
 
 		bn_right = new_rgt;
-		bn_right->bn_left = this;
+		bn_right->bn_left = loc_ths;
 
 		new_mid->bn_right = old_rgt;
 		new_mid->bn_right->bn_left = new_mid;
@@ -154,6 +189,7 @@ public:
 		if(grp.is_alone()){
 			return;
 		}
+		binder* loc_ths = (binder*)mck_as_loc_pt(this);
 
 		BINDER_CK(ck_binder());
 
@@ -165,7 +201,7 @@ public:
 		grp.bn_left = &grp;
 
 		bn_left = new_lft;
-		bn_left->bn_right = this;
+		bn_left->bn_right = loc_ths;
 
 		new_mid->bn_left = old_lft;
 		new_mid->bn_left->bn_right = new_mid;
@@ -202,9 +238,9 @@ mc_c_decl {
 
 
 /*
-	host_binder() mc_external_code_ram;
-	~host_binder() mc_external_code_ram;
-	void	init_host_binder() mc_external_code_ram;
+	manageru_binder() mc_external_code_ram;
+	~manageru_binder() mc_external_code_ram;
+	void	init_manageru_binder() mc_external_code_ram;
 	bool	is_alone() mc_external_code_ram;
 	void	let_go() mc_external_code_ram;
 	bool	ck_binder() mc_external_code_ram;

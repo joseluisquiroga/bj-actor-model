@@ -1,0 +1,21 @@
+[tasks]
+prf
+
+[options]
+prf: mode prove
+prf: depth 20
+
+[engines]
+smtbmc
+
+[script]
+read -formal hnet_src.v
+read -formal hnet_snk.v
+read -formal hproto_CK.v
+prep -top formal_top
+
+[files]
+../rtl/hnet_src.v
+../rtl/hnet_snk.v
+../rtl/hglobal.v
+./hproto_CK.v

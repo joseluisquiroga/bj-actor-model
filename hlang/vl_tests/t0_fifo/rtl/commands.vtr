@@ -1,0 +1,7 @@
+bin_to_disp.v
+debouncer.v
+calc_redun.v
+tree_nand.v
+nd_fifo.v
+io_fifo.v
+test_0.v
